@@ -11,6 +11,9 @@ class Todo(db.Model):
     date_created = db.Column(db.DateTime,default=datetime.now)
     def __repr__(self):
         return '<Task %r>' % self.id
+with app.app_context():
+        db.create_all()
+
 @app.route('/',methods=['POST','GET'])
 def index():
     if request.method=='POST':
@@ -25,6 +28,7 @@ def index():
     else:
         tasks=Todo.query.order_by(Todo.date_created).all()
         return render_template('index.html',tasks=tasks)
+
 @app.route('/delete/<int:id>')
 def delete(id):
     task_to_delete = Todo.query.get_or_404(id)
@@ -35,18 +39,22 @@ def delete(id):
         return redirect('/')
     except:
         return "Error"
-@app.route('/update/<int:id>', methods=['GET','POST'])
+
+@app.route('/update/<int:id>', methods=['GET', 'POST'])
 def update(id):
     task = Todo.query.get_or_404(id)
-    if request.method=='POST':
+
+    if request.method == 'POST':
         task.content = request.form['content']
         try:
             db.session.commit()
             return redirect('/')
         except:
-            return "There was an issue updating the task"
+            return 'There was an issue updating your task'
+
     else:
-        return render_template('update.html',task=task)
+        return render_template('update.html', task=task)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
